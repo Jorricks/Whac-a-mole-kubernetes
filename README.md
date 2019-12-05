@@ -11,9 +11,33 @@ This repository is split into two applications.
 This is a very basic flask application which is dockerized.\
 The docker image is ran as a pod in Kubernetes.
 
+### Molerelay
+
+
 ### Molegame
 The application that is run to start the whack-a-mole game.\
 Once we start our application, several 
+
+# Requirements
+1. Python3.7
+2. Docker
+3. Minikube
+
+# General instructions
+### Get your terminal configured to get minikube working correctly
+    
+    export MINIKUBE_HOME=/Users/jorricks/PycharmProjects/whac-a-mole-kubernetes;
+    export PATH=$MINIKUBE_HOME/bin:$PATH
+    export KUBECONFIG=$MINIKUBE_HOME/.kube/config
+    export KUBE_EDITOR="code -w"
+    
+### To create a new minikube profile
+    minikube --profile whac config set memory 6144
+    minikube --profile whac config set cpus 2
+    minikube --profile whac config set vm-driver hyperkit
+    minikube --profile whac config set kubernetes-version v1.15.6
+    minikube start --profile whac
+    minikube profile whac
 
 # How to start the molegame
 @ToDo
@@ -24,6 +48,7 @@ Once we start our application, several
 2. Make your change.
 3. Verify the changes are correct by running.
 
-        mypy molepod/src/molepod/ molegame/src/molegame/ --ignore-missing-imports
+        mypy --ignore-missing-imports molepod/src/molepod/ molegame/src/molegame/ molerelay/src/molerelay
         flake8 --max-line-length=100 molepod/src/molepod molegame/src/molegame/
+        
 4. Provide a pull request.
