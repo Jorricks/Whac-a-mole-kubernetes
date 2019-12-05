@@ -21,6 +21,6 @@ setup(
         'dev': dev_packages
     },
     description="",
-    entry_points={"console_scripts": ["molegame = molegame.cli:main"]},
+    entry_points={"console_scripts": ["game = game.cli:main"]},
     author="Jorrick Sleijster",
 )
