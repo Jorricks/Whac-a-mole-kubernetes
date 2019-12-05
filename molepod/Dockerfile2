@@ -1,0 +1,19 @@
+FROM python:3.7-slim-stretch
+
+EXPOSE 8080
+WORKDIR /app
+COPY requirements.txt .
+RUN python3 -m venv .venv \
+&& .venv/bin/pip install --no-cache-dir -U pip -r requirements.txt
+
+COPY . /app
+
+RUN .venv/bin/pip install --no-cache-dir -U pip ".[dev]" \
+&& . .venv/bin/activate \
+&& mypy src/molepod --ignore-missing-imports \
+&& flake8 --max-line-length=100 src/molepod \
+&& rm -rf .venv/ \
+&& pip install .
+
+CMD molepod start --port 8080
+

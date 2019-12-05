@@ -2,12 +2,16 @@ from setuptools import setup, find_packages
 
 
 base_packages = [
-    "click"
+    "click",
+    "gevent",
+    "flask"
 ]
 
 dev_packages = [
     "mypy",
-    "flake8"
+    "flake8",
+    "pytest",
+    "requests"
 ]
 
 setup(

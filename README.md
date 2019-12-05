@@ -24,7 +24,6 @@ Once we start our application, several
 2. Make your change.
 3. Verify the changes are correct by running.
 
-        cd src/
-        mypy gitje/
-        flake8 --max-line-length=100 gitje
+        mypy molepod/src/molepod/ molegame/src/molegame/ --ignore-missing-imports
+        flake8 --max-line-length=100 molepod/src/molepod molegame/src/molegame/
 4. Provide a pull request.
