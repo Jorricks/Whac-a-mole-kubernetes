@@ -1,0 +1,7 @@
+click
+gevent
+flask
+requests
+mypy
+flake8
+pytest
