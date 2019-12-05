@@ -65,9 +65,8 @@ def get_flask_app(shutdown_routine: Callable[[], None]) -> Flask:
         """
         Complete shutdown of our web server
         """
-        logging.info(f'Shutdown {hostname}')
         shutdown_routine()
-        return log_make_response(f'No response should be given', 500)
+        return log_make_response(f'Received shutdown request for {hostname}', 200)
 
     return app
 
