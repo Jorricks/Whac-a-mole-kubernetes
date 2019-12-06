@@ -1,4 +1,6 @@
 
+// @ToDo implement automatic scaling
+// @ToDo do this at the img level and then the heights etc...
 
 function createMole(width){
     const fullWidth = 383;
