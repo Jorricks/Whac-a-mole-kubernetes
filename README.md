@@ -48,7 +48,7 @@ Once we start our application, several
 2. Make your change.
 3. Verify the changes are correct by running.
 
-        mypy --ignore-missing-imports molepod/src/molepod/ molegame/src/molegame/ molerelay/src/molerelay
-        flake8 --max-line-length=100 molepod/src/molepod molegame/src/molegame/
+        mypy --ignore-missing-imports pod/src/molepod/ game/src/molegame/ relay/src/molerelay/
+        flake8 --max-line-length=100 pod/src/molepod game/src/molegame relay/src/molerelay
         
 4. Provide a pull request.

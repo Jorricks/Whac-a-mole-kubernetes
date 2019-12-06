@@ -1,7 +1,9 @@
 # Mole game
+The core of the application. \
+This part is responsible for the logic of creating and updating the kubernetes pods 
+and the interface.
 
-
-# Minikube setttings
+# Minikube settings
     export MINIKUBE_HOME=/Users/jorricks/PycharmProjects/whac-a-mole-kubernetes;
     export PATH=$MINIKUBE_HOME/bin:$PATH
     export KUBECONFIG=$MINIKUBE_HOME/.kube/config
