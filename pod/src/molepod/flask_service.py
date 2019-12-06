@@ -40,7 +40,6 @@ def get_flask_app(shutdown_routine: Callable[[], None]) -> Flask:
     def health_check() -> str:
         """
         How is our health doing
-        :return:
         """
         nonlocal request
 

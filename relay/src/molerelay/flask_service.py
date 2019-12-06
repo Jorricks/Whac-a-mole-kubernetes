@@ -29,15 +29,24 @@ def stop_app() -> None:
 def get_flask_app() -> Flask:
     app = Flask(__name__)
 
+    request_counter = 0
+
     def log_make_response(message, code) -> str:
         logging.info(f'Code: {code}, Message: {message}')
         return make_response(message, code)
+
+    @app.route('/health')
+    def health_check() -> str:
+        """
+        How is our health doing
+        """
+        return log_make_response(f'Hello #{request_counter}!', 200)
 
     @app.route('/')
     def relay_message() -> str:
         """
         Relay a message
-        :return: The message we got from the other cluster.
+        :return: The message we got from the container at ip:port/link.
         """
 
         ip = request.args.get('ip', default='')
