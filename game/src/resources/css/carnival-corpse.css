@@ -1,0 +1,18 @@
+@font-face {
+    font-family: 'Carnival Corpse Regular';
+    font-style: normal;
+    font-weight: normal;
+    src: local('Carnival Corpse Regular'), url('fonts/carnivalcorpse.woff') format('woff');
+}
+@font-face {
+    font-family: 'Carnival Corpse Punch Regular';
+    font-style: normal;
+    font-weight: normal;
+    src: local('Carnival Corpse Punch Regular'), url('fonts/carnivalcorpsepunch.woff') format('woff');
+}
+@font-face {
+    font-family: 'Carnival Corpse Shadow Regular';
+    font-style: normal;
+    font-weight: normal;
+    src: local('Carnival Corpse Shadow Regular'), url('fonts/carnivalcorpseshadow.woff') format('woff');
+}

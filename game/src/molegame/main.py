@@ -1,26 +1,20 @@
 import atexit
 import time
-from typing import Optional, Tuple, List
+from typing import Optional, List
 
 from kubernetes import client, config
-from kubernetes.client import CoreV1Api, AppsV1Api, V1Deployment, V1PodList, V1Pod, V1Container, \
-    V1Endpoints, V1Service
-
-v1_core: Optional[CoreV1Api] = None
-v1_apps: Optional[AppsV1Api] = None
+from kubernetes.client import CoreV1Api, AppsV1Api, V1Deployment, V1PodList, V1Pod, V1Container
 
 
 def load_kubernetes_config(config_file: Optional[str]) -> None:
     """
     We load the kubernetes config and than the corresponding API into the global v1 variable.
-    :param config_file: the path to the kubernetes config file
+    :param config_file: The path to the kubernetes config file.
     """
-    global v1_core, v1_apps
     if config_file is None or config_file == "":
-        config.load_kube_config(
-            config_file='/Users/jorricks/PycharmProjects/whac-a-mole-kubernetes/.kube/config')
-    else:
         config.load_kube_config()
+    else:
+        config.load_kube_config(config_file=config_file)
 
 
 def print_all_relevant_pods(core_instance: CoreV1Api, deployment_name: str) -> None:
@@ -42,11 +36,12 @@ def print_all_relevant_pods(core_instance: CoreV1Api, deployment_name: str) -> N
         print("%s\t%s\t%s" % (i.status.pod_ip, i.metadata.namespace, i.metadata.name))
 
 
-def create_container_object(deployment_image: str, port: int) -> V1Container:
+def create_container_object(deployment_image: str, port: int, external_port: bool) -> V1Container:
     """
     Create the container object
     :param deployment_image: The image name in the docker environment.
     :param port: port of the web_server.
+    :param external_port: whether the port should be an external port.
     :return: The container object.
     """
     liveness_probe = client.V1Probe(
@@ -69,17 +64,21 @@ def create_container_object(deployment_image: str, port: int) -> V1Container:
         period_seconds=3,
     )
 
+    port = client.V1ContainerPort(
+            container_port=port,
+            host_ip='0.0.0.0',
+            host_port=port,
+            name='prt',
+            protocol='TCP'
+        ) if external_port else client.V1ContainerPort(
+            container_port=port
+        )
+
     return client.V1Container(
         name="molerelay",
         image=deployment_image,
         image_pull_policy="Never",
-        ports=[client.V1ContainerPort(
-            container_port=port,
-            # host_ip='0.0.0.0',
-            # host_port=8080,
-            # name='prt',
-            # protocol='TCP'
-        )],
+        ports=[port],
         liveness_probe=liveness_probe,
         readiness_probe=readiness_probe
     )
@@ -87,19 +86,21 @@ def create_container_object(deployment_image: str, port: int) -> V1Container:
 
 def create_deployment_object(
         no_replicas: int,
-        deployment_image: str,
+        deployment_images: str,
         deployment_name: str,
         port: int,
+        external_port: bool,
 ) -> V1Deployment:
     """
     We create a deployment according to the specified arguments.
     :param no_replicas: Number of container in the pod.
-    :param deployment_image: The image name in the docker environment.
+    :param deployment_images: The image name in the docker environment for the moles.
     :param deployment_name: The name of the deployment.
     :param port: port of the web_server.
+    :param external_port: whether the port should be an external port.
     :return: Deployment setup.
     """
-    container = create_container_object(deployment_image, port)
+    container = create_container_object(deployment_images, port, external_port)
 
     # Create and configure a spec section
     template = client.V1PodTemplateSpec(
@@ -133,111 +134,44 @@ def create_deployment(api_instance: AppsV1Api, deployment: V1Deployment, namespa
     print("Deployment created.\n status=\n'%s'" % str(api_response.status))
 
 
-def update_deployment(
-        api_instance: AppsV1Api,
-        deployment: V1Deployment,
-        deployment_name: str,
-        namespace: str
-) -> None:
-    """
-    Update our deployment
-    :param api_instance: The api instance.
-    :param deployment: The deployment setup.
-    :param deployment_name: The name of the deployment.
-    :param namespace: The namespace in which the pods are deployed.
-    """
-    # Update container image
-    deployment.spec.template.spec.containers[0].image = "nginx:1.16.0"
-    # Update the deployment
-    api_response = api_instance.patch_namespaced_deployment(
-        name=deployment_name,
-        namespace=namespace,
-        body=deployment)
-    print("Deployment updated.\n status=\n'%s'" % str(api_response.status))
+# def update_deployment(
+#         api_instance: AppsV1Api,
+#         deployment: V1Deployment,
+#         deployment_name: str,
+#         namespace: str
+# ) -> None:
+#     """
+#     Update our deployment
+#     :param api_instance: The api instance.
+#     :param deployment: The deployment setup.
+#     :param deployment_name: The name of the deployment.
+#     :param namespace: The namespace in which the pods are deployed.
+#     """
+#     # Update container image
+#     deployment.spec.template.spec.containers[0].image = "nginx:1.16.0"
+#     # Update the deployment
+#     api_response = api_instance.patch_namespaced_deployment(
+#         name=deployment_name,
+#         namespace=namespace,
+#         body=deployment)
+#     print("Deployment updated.\n status=\n'%s'" % str(api_response.status))
 
 
-def delete_deployment(api_instance: AppsV1Api, deployment_name: str, namespace: str) -> None:
+def delete_deployment(api_instance: AppsV1Api, deployment_names: List[str], namespace: str) -> None:
     """
     Delete our deployment
     :param api_instance: The api instance
-    :param deployment_name: The name of the deployment.
+    :param deployment_names: The names of the deployments.
     :param namespace: The namespace in which the pods are deployed.
     """
-    api_response = api_instance.delete_namespaced_deployment(
-        name=deployment_name,
-        namespace=namespace,
-        body=client.V1DeleteOptions(
-            propagation_policy='Foreground',
-            grace_period_seconds=5))
-    print("Deployment deleted. status='%s'" % str(api_response.status))
-
-
-def create_service_objects(
-        deployment_name: str,
-        client_ports: List[int],
-        host_ports: List[int],
-) -> V1Service:
-    """
-    We create the service object
-    :param deployment_name: The deployment name.
-    :param client_ports: A list of all client ports (all the ports of the pods).
-    :param host_ports:
-    :return:
-    """
-    assert len(client_ports) == len(host_ports)
-    ports = []
-
-    for i in range(len(client_ports)):
-        ports.append(
-            client.V1ServicePort(
-                protocol='TCP',
-                port=host_ports[i],
-                target_port=client_ports[i]
-            )
-        )
-
-    return client.V1Service(
-        api_version="v1",
-        kind="Service",
-        metadata=client.V1ObjectMeta(name=deployment_name),
-        spec=client.V1ServiceSpec(
-            ports=ports
-        )
-    )
-
-
-def create_endpoint_object(
-        deployment_name: str,
-        client_ip: int,
-        client_port: int,
-        host_port: int,
-) -> Tuple[V1Service, V1Endpoints]:
-    """
-    :param deployment_name: The name of the deployment.
-    :param client_ip: The clients ip.
-    :param client_port: The clients port.
-    :param host_port: THe hosts port.
-    :return All unlocked ports.
-    """
-
-    endpoint = client.V1Endpoints(
-        api_version="v1",
-        kind="Endpoints",
-        metadata=client.V1ObjectMeta(name=deployment_name),
-        subsets=client.V1EndpointSubset(
-            addresses=[
-                client.V1EndpointAddress(
-                    ip=client_ip
-                )
-            ],
-            ports=[
-                client.V1EndpointPort(
-                    port=client_port
-                )
-            ]
-        ))
-
-    return service, endpoint
+    for deployment_name in deployment_names:
+        api_response = api_instance.delete_namespaced_deployment(
+            name=deployment_name,
+            namespace=namespace,
+            body=client.V1DeleteOptions(
+                propagation_policy='Foreground',
+                grace_period_seconds=5))
+        print("Deployment deleted. status='%s'" % str(api_response.status))
 
 
 def change_image(deployment: V1Deployment, new_image_name: str) -> None:
@@ -249,70 +183,85 @@ def change_image(deployment: V1Deployment, new_image_name: str) -> None:
     deployment.spec.template.spec.containers[0].image = new_image_name
 
 
-def main(
+def run_whac_a_mole(
+        kubernetes_config: Optional[str],
         no_replicas: int,
-        deployment_image: str,
+        deployment_image_mole: str,
+        deployment_image_relay: str,
         deployment_name: str,
         namespace: str,
-        port: int,
-) -> None:
+        port: int) -> None:
     """
     Main routine.
+    :param kubernetes_config: The path to the kubernetes config file.
     :param no_replicas: Number of container in the pod.
-    :param deployment_image: The image name in the docker environment.
+    :param deployment_image_mole: The image name in the docker environment for the mole image.
+    :param deployment_image_relay: The image names in the docker environment for the relay image.
     :param deployment_name: The name of the deployment.
     :param namespace: The namespace in which the pods are deployed.
     :param port: port of the web_server.
     """
-    # Configs can be set in Configuration class directly or using helper
-    # utility. If no argument provided, the config will be loaded from
-    # default location.
-    load_kubernetes_config(None)
+    load_kubernetes_config(kubernetes_config)
+
     apps_v1 = client.AppsV1Api()
     core_v1 = client.CoreV1Api()
 
-    # Create a deployment object with client-python API. The deployment we
-    # created is same as the `nginx-deployment.yaml` in the /examples folder.
+    deployment_name_mole = deployment_name + '-mole-prod'
+    deployment_name_relay = deployment_name + '-relay-pod'
 
-    deployment = create_deployment_object(
+    deployment_relay = create_deployment_object(
+        no_replicas=1,
+        deployment_images=deployment_image_relay,
+        deployment_name=deployment_name_relay,
+        port=port,
+        external_port=True)
+
+    deployment_mole = create_deployment_object(
         no_replicas=no_replicas,
-        deployment_image=deployment_image,
-        deployment_name=deployment_name,
-        port=port
-    )
+        deployment_images=deployment_image_mole,
+        deployment_name=deployment_name_mole,
+        port=port,
+        external_port=False)
 
-    # time.sleep(5)
-    # print_all_pods(core_v1)
+    create_deployment(api_instance=apps_v1, deployment=deployment_relay, namespace=namespace)
+    create_deployment(api_instance=apps_v1, deployment=deployment_mole, namespace=namespace)
 
-    create_deployment(api_instance=apps_v1, deployment=deployment, namespace=namespace)
-
+    # When we shut down our program, this is always ran!
     atexit.register(delete_deployment,
                     api_instance=apps_v1,
-                    deployment_name=deployment_name,
+                    deployment_names=[deployment_name_relay, deployment_name_mole],
                     namespace=namespace)
-    # delete_deployment(api_instance=apps_v1, deployment_name=deployment_name, namespace=namespace)
 
+    print_all_relevant_pods(core_instance=core_v1, deployment_name=deployment_name_relay)
+    print_all_relevant_pods(core_instance=core_v1, deployment_name=deployment_name_mole)
+    time.sleep(3)
+    print_all_relevant_pods(core_instance=core_v1, deployment_name=deployment_name_relay)
     print_all_relevant_pods(core_instance=core_v1, deployment_name=deployment_name)
     time.sleep(3)
     print_all_relevant_pods(core_instance=core_v1, deployment_name=deployment_name)
-    time.sleep(100)
-
-    # update_deployment(
-    #     api_instance=apps_v1,
-    #     deployment=deployment,
-    #     deployment_name=deployment_name,
-    #     namespace=namespace
-    # )
-
+    time.sleep(1000)
     print_all_relevant_pods(core_instance=core_v1, deployment_name=deployment_name)
-    time.sleep(15)
+
+
+def get_correct_config_folder(project_dir: str) -> str:
+    """
+    Finds the correct config folder by looking at the parents of the current working dir and
+    comparing this to our project directory.
+    :return:
+    """
+    from pathlib import Path
+    d = Path().resolve()
+    while d.as_posix().split('/')[-1] != project_dir:
+        d = d.parent
+    return d.as_posix() + '/.kube/config'
 
 
 if __name__ == '__main__':
-    main(
+    run_whac_a_mole(
+        kubernetes_config=get_correct_config_folder('whac-a-mole-kubernetes'),
         no_replicas=3,
-        deployment_image='molepodprod',
-        deployment_name='molerelay-prod',
+        deployment_image_mole='molepodprod',
+        deployment_image_relay='molerelayprod',
+        deployment_name='mole',
         namespace='whac',
-        port=8080
-    )
+        port=8080)

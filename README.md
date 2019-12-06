@@ -52,3 +52,7 @@ Once we start our application, several
         flake8 --max-line-length=100 pod/src/molepod game/src/molegame relay/src/molerelay
         
 4. Provide a pull request.
+
+# Special thanks to
+- https://media.istockphoto.com/illustrations/game-to-hit-the-mole-illustration-id1153033854
+- https://www.skincancer.org/wp-content/uploads/whackamole-900px.jpg

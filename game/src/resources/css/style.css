@@ -1,0 +1,152 @@
+
+body {
+    background-color: #FDC240;
+    /*background-color: #FDC24060;*/
+    font-family: 'Carnival Corpse Regular', serif;
+}
+
+.title-text {
+    font-family: 'Carnival Corpse Shadow Regular', serif;
+    color: #FFFFFFAA;
+    font-size: 70px;
+    text-align: center;
+    width: 100%;
+}
+
+.all-moles {
+    margin-top: 100px;
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.resized-mole,
+.no-mole,
+.half-no-mole {
+    display: inline-block;
+    height: 350px;
+    position: relative;
+}
+
+
+.resized-mole,
+.no-mole {
+    width: 192px;
+}
+
+.half-no-mole {
+    width: 192px;
+}
+
+.a-mole-container {
+    position: absolute;
+    /*height: 700px;*/
+    /*width: 383px;*/
+    /**/
+    /*margin-left: -95px;*/
+    /*margin-top: -175px;*/
+
+    -webkit-transform: scale(0.5);
+    -moz-transform: scale(0.5);
+    -ms-transform: scale(0.5);
+    transform: scale(0.5);
+}
+
+.a-mole-container div {
+    position: absolute;
+}
+
+.show-mole .mole {
+    margin-top: 0;
+}
+
+.mole {
+    margin-top: 270px;
+    margin-left: 16px;
+    z-index: 2;
+    transition: all 1s;
+}
+
+.hole {
+    margin-top: 270px;
+    z-index: 1;
+}
+
+.below-hole {
+    margin-top: 320px;
+    z-index: 3;
+}
+
+.show-mole .text {
+    color: lightgreen;
+    -webkit-animation: color_change 1s infinite alternate;
+    -moz-animation: color_change 1s infinite alternate;
+    -ms-animation: color_change 1s infinite alternate;
+    -o-animation: color_change 1s infinite alternate;
+    animation: color_change 1s infinite alternate;
+}
+
+.text {
+    color: #FFFFFF60;
+    width: 100%;
+    text-align: center;
+    font-size: 60px;
+    margin-top: 400px;
+    z-index: 4;
+}
+
+
+@-webkit-keyframes color_change {
+    from {
+        color: cornflowerblue;
+    }
+    to {
+        color: yellow;
+    }
+}
+
+@-moz-keyframes color_change {
+    from {
+        color: cornflowerblue;
+    }
+    to {
+        color: yellow;
+    }
+}
+
+@-ms-keyframes color_change {
+    from {
+        color: cornflowerblue;
+    }
+    to {
+        color: yellow;
+    }
+}
+
+@-o-keyframes color_change {
+    from {
+        color: cornflowerblue;
+    }
+    to {
+        color: yellow;
+    }
+}
+
+@keyframes color_change {
+    from {
+        color: cornflowerblue;
+    }
+    to {
+        color: yellow;
+    }
+}
+
+@font-face {
+    font-family: 'Carnival Rimmed';
+    font-style: normal;
+    font-weight: normal;
+    src: url('Carnival Rimmed.woff') format('woff');
+
+    /*src: local('Carnival Rimmed'), url('Carnival Rimmed.woff') format('woff');*/
+}
+    
