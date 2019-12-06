@@ -1,15 +1,35 @@
 
-// @ToDo implement automatic scaling
-// @ToDo do this at the img level and then the heights etc...
+function createSetup(moles){
+    for (let mole in moles){
+        mole = parseInt(mole);
+        createMole(moles[mole]);
+        if (mole % 7 < 4){
+            if (mole < moles.length - 1){
+                createGap();
+            }
+        } else {
+            createGap();
+        }
+    }
+}
 
-function createMole(width){
-    const fullWidth = 383;
-    const fullHeight = 700;
-    const sizeScale = width / fullWidth;
+function updateSpecificMole(moleName, alive){
+    let $mole = $('#'+moleName);
+    console.log($mole);
+    $mole.removeClass('ready-mole');
+    $mole.removeClass('unready-mole');
+    if (alive === "ready"){
+        $mole.addClass('ready-mole')
+    } else if (alive === "unready"){
+        $mole.addClass('unready-mole');
+    }
+}
 
+function createMole(moleName){
     let $allMoles = $('.all-moles');
 
     let $resizedMole = $('<div>')
+        .attr('id', moleName)
         .addClass('resized-mole')
         .appendTo($allMoles);
 
@@ -18,7 +38,7 @@ function createMole(width){
         // .attr('-webkit-transform', 'scale(' + sizeScale + ')')
         // .attr('-moz-transform', 'scale(' + sizeScale + ')')
         // .attr('-ms-transform', 'scale(' + sizeScale + ')')
-        .attr('transform', 'scale(' + sizeScale + ')')
+        // .attr('transform', 'scale(' + sizeScale + ')')
         .appendTo($resizedMole);
 
     let $mole = $('<div>')
@@ -54,8 +74,23 @@ function createMole(width){
         .attr('height', 471)
         .appendTo($belowHole);
 
-    $('<div>')
+    let $textContainer = $('<div>')
         .addClass('text')
-        .text('IDENTIFIER')
         .appendTo($aMoleContainer);
+
+    $('<div>')
+        .text(moleName)
+        .appendTo($textContainer);
+
+    $('<div>')
+        .addClass('unready-indicator')
+        .text('almost ready')
+        .appendTo($textContainer);
+}
+
+function createGap(){
+    let $allMoles = $('.all-moles');
+    $('<div>')
+        .addClass('no-mole')
+        .appendTo($allMoles);
 }

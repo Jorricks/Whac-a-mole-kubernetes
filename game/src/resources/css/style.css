@@ -3,6 +3,7 @@ body {
     background-color: #FDC240;
     /*background-color: #FDC24060;*/
     font-family: 'Carnival Corpse Regular', serif;
+    min-width: 1340px;
 }
 
 .title-text {
@@ -14,49 +15,37 @@ body {
 }
 
 .all-moles {
-    margin-top: 100px;
-    max-width: 1200px;
+    margin-top: 150px;
+    width: 880px;
     margin-left: auto;
     margin-right: auto;
+    text-align: center;
 }
 
 .resized-mole,
-.no-mole,
-.half-no-mole {
+.no-mole{
     display: inline-block;
-    height: 350px;
+    height: 238px;
     position: relative;
+    margin-top: -80px;
+    width: 115px;
 }
 
-
-.resized-mole,
-.no-mole {
-    width: 192px;
-}
-
-.half-no-mole {
-    width: 192px;
-}
 
 .a-mole-container {
     position: absolute;
-    /*height: 700px;*/
-    /*width: 383px;*/
-    /**/
-    /*margin-left: -95px;*/
-    /*margin-top: -175px;*/
 
-    -webkit-transform: scale(0.5);
-    -moz-transform: scale(0.5);
-    -ms-transform: scale(0.5);
-    transform: scale(0.5);
+    -webkit-transform: scale(0.3);
+    -moz-transform: scale(0.3);
+    -ms-transform: scale(0.3);
+    transform: scale(0.3);
 }
 
 .a-mole-container div {
     position: absolute;
 }
 
-.show-mole .mole {
+.ready-mole .mole {
     margin-top: 0;
 }
 
@@ -77,22 +66,37 @@ body {
     z-index: 3;
 }
 
-.show-mole .text {
+.ready-mole .text {
     color: lightgreen;
     -webkit-animation: color_change 1s infinite alternate;
     -moz-animation: color_change 1s infinite alternate;
-    -ms-animation: color_change 1s infinite alternate;
+    /*-ms-animation: color_change 1s infinite alternate;*/
     -o-animation: color_change 1s infinite alternate;
     animation: color_change 1s infinite alternate;
 }
 
 .text {
     color: #FFFFFF60;
-    width: 100%;
     text-align: center;
     font-size: 60px;
     margin-top: 400px;
     z-index: 4;
+    width: 383px;
+}
+
+.text div {
+    display: block;
+    position: relative;
+    width: 100%;
+    text-align: center;
+}
+
+.text div.unready-indicator {
+    display: none;
+}
+
+.unready-mole .text div.unready-indicator {
+    display: block;
 }
 
 
@@ -139,14 +143,5 @@ body {
     to {
         color: yellow;
     }
-}
-
-@font-face {
-    font-family: 'Carnival Rimmed';
-    font-style: normal;
-    font-weight: normal;
-    src: url('Carnival Rimmed.woff') format('woff');
-
-    /*src: local('Carnival Rimmed'), url('Carnival Rimmed.woff') format('woff');*/
 }
     
