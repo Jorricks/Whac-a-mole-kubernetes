@@ -6,11 +6,29 @@ $(document).ready(function () {
         $('.hover-mouse')
             .css('left', width + 'px')
             .css('top', height + 'px');
-    })
+    });
+
+    updateOurUI();
 });
 
 dictOfHashToIPs = {};
 killMethod = 'kill';  // Can be either kill or shutdown
+updateUI = false;
+
+function changeNOReplicas(no_replicas){
+    $.getJSON('http://localhost/update_no_replicas?get='+no_replicas)
+        .done(function(data){
+            console.log(data);
+        });
+}
+
+function updateOurUI(){
+    // do whatever you like here
+    if (updateUI){
+        updateMoles();
+    }
+    setTimeout(updateOurUI, 200);
+}
 
 function createTextRequest(url, doneFunction) {
     var request = $.ajax({
@@ -23,7 +41,7 @@ function createTextRequest(url, doneFunction) {
 }
 
 function updateMoles() {
-    $.getJSON('http://localhost/get_pod')
+    $.getJSON('http://localhost/get_pod_info')
         .done(function (data) {
             if (data.length !== (Object.keys(dictOfHashToIPs).length)) {
                 dictOfHashToIPs = {};
@@ -39,7 +57,7 @@ function updateMoles() {
                 createSetup();
             }
 
-            dict_of_hash_to_status = {};
+            dictOfHashToStatus = {};
             for (let container_index in data) {
                 console.log(data[container_index]);
                 let container = data[container_index];
@@ -47,16 +65,16 @@ function updateMoles() {
                 let hash = name.slice(name.length - 5, name.length);
                 let phase = container['status']['container_statuses'][0]['ready'];
 
-                dict_of_hash_to_status[hash] = phase;
+                dictOfHashToStatus[hash] = phase;
             }
-            updateMoleReadyOrNot(dict_of_hash_to_status);
+            updateMoleReadyOrNot(dictOfHashToStatus);
         });
 }
 
 function updateMoleReadyOrNot(dict_of_hash_to_status) {
     for (let mole in dict_of_hash_to_status) {
         console.log(dict_of_hash_to_status[mole]);
-        if (dict_of_hash_to_status[mole] == false){
+        if (dict_of_hash_to_status[mole] === false){
             updateSpecificMole(mole.toString(), "unready");
         } else {
             updateSpecificMole(mole.toString(), "ready");
@@ -94,6 +112,7 @@ function updateSpecificMole(moleName, alive) {
 }
 
 function killMole($resizedMole){
+    $resizedMole.removeClass('ready-mole');
     let hash = $resizedMole.attr('molehash');
     let ip = dictOfHashToIPs[hash];
     console.log(hash, ip);
@@ -123,10 +142,6 @@ function createMole(moleName) {
 
     let $aMoleContainer = $('<div>')
         .addClass('a-mole-container')
-        // .attr('-webkit-transform', 'scale(' + sizeScale + ')')
-        // .attr('-moz-transform', 'scale(' + sizeScale + ')')
-        // .attr('-ms-transform', 'scale(' + sizeScale + ')')
-        // .attr('transform', 'scale(' + sizeScale + ')')
         .appendTo($resizedMole);
 
     let $mole = $('<div>')
