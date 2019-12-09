@@ -1,10 +1,78 @@
+$(document).ready(function () {
+    $("body").mousemove(function (e) {
+        let width = e.pageX;
+        let height = e.pageY;
+        // console.log(width, height);
+        $('.hover-mouse')
+            .css('left', width + 'px')
+            .css('top', height + 'px');
+    })
+});
 
-function createSetup(moles){
-    for (let mole in moles){
-        mole = parseInt(mole);
-        createMole(moles[mole]);
-        if (mole % 7 < 4){
-            if (mole < moles.length - 1){
+dictOfHashToIPs = {};
+killMethod = 'kill';  // Can be either kill or shutdown
+
+function createTextRequest(url, doneFunction) {
+    var request = $.ajax({
+        url: url,
+        dataType: "text"
+    });
+    if (doneFunction != null) {
+        request.done(doneFunction);
+    }
+}
+
+function updateMoles() {
+    $.getJSON('http://localhost/get_pod')
+        .done(function (data) {
+            if (data.length !== (Object.keys(dictOfHashToIPs).length)) {
+                dictOfHashToIPs = {};
+                for (let container_index in data) {
+                    console.log(data[container_index]);
+                    let container = data[container_index];
+                    let name = container['metadata']['name'];
+                    let hash = name.slice(name.length - 5, name.length);
+                    let ip = container['status']['pod_ip'];
+
+                    dictOfHashToIPs[hash] = ip;
+                }
+                createSetup();
+            }
+
+            dict_of_hash_to_status = {};
+            for (let container_index in data) {
+                console.log(data[container_index]);
+                let container = data[container_index];
+                let name = container['metadata']['name'];
+                let hash = name.slice(name.length - 5, name.length);
+                let phase = container['status']['container_statuses'][0]['ready'];
+
+                dict_of_hash_to_status[hash] = phase;
+            }
+            updateMoleReadyOrNot(dict_of_hash_to_status);
+        });
+}
+
+function updateMoleReadyOrNot(dict_of_hash_to_status) {
+    for (let mole in dict_of_hash_to_status) {
+        console.log(dict_of_hash_to_status[mole]);
+        if (dict_of_hash_to_status[mole] == false){
+            updateSpecificMole(mole.toString(), "unready");
+        } else {
+            updateSpecificMole(mole.toString(), "ready");
+        }
+    }
+}
+
+function createSetup() {
+    let moles = Object.keys(dictOfHashToIPs);
+    console.log(moles);
+
+    for (let mole in moles) {
+        mole = parseInt(mole);  // This is the integer index in the key array of dict_of_hash_to_ips.
+        createMole(moles[mole], status[mole]);
+        if (mole % 7 < 4) {
+            if (mole < moles.length - 1) {
                 createGap();
             }
         } else {
@@ -13,24 +81,44 @@ function createSetup(moles){
     }
 }
 
-function updateSpecificMole(moleName, alive){
-    let $mole = $('#'+moleName);
+function updateSpecificMole(moleName, alive) {
+    let $mole = $("div[molehash='" + moleName + "']");
     console.log($mole);
     $mole.removeClass('ready-mole');
-    $mole.removeClass('unready-mole');
-    if (alive === "ready"){
+    // $mole.removeClass('unready-mole');
+    if (alive === "ready") {
         $mole.addClass('ready-mole')
-    } else if (alive === "unready"){
-        $mole.addClass('unready-mole');
+    } else if (alive === "unready") {
+        // $mole.addClass('unready-mole');
     }
 }
 
-function createMole(moleName){
+function killMole($resizedMole){
+    let hash = $resizedMole.attr('molehash');
+    let ip = dictOfHashToIPs[hash];
+    console.log(hash, ip);
+    let url = '';
+    if (killMethod === "kill"){
+        url = 'http://localhost/relay?ip=' + ip + '&port=8080&link=kill'
+    } else if (killMethod === "shutdown"){
+        url = 'http://localhost/relay?ip=' + ip + '&port=8080&link=shutdown'
+    } else{
+        console.error('killMethod has a weird value: ', killMethod);
+        return null;
+    }
+    console.log(url);
+    createTextRequest(url, null);
+}
+
+function createMole(moleName) {
     let $allMoles = $('.all-moles');
 
     let $resizedMole = $('<div>')
-        .attr('id', moleName)
+        .attr('molehash', moleName)
         .addClass('resized-mole')
+        .click(function() {
+            killMole($(this));
+        })
         .appendTo($allMoles);
 
     let $aMoleContainer = $('<div>')
@@ -88,7 +176,7 @@ function createMole(moleName){
         .appendTo($textContainer);
 }
 
-function createGap(){
+function createGap() {
     let $allMoles = $('.all-moles');
     $('<div>')
         .addClass('no-mole')

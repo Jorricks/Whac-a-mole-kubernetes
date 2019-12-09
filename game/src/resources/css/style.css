@@ -1,9 +1,41 @@
 
 body {
-    background-color: #FDC240;
-    /*background-color: #FDC24060;*/
+    background-image: url(../img/BackgroundColorPixel.png);
+    background-repeat: repeat;
+    /*background-color: #FDC240;*/
     font-family: 'Carnival Corpse Regular', serif;
     min-width: 1340px;
+}
+
+.hover-mouse{
+    width: fit-content;
+    height: fit-content;
+    position: fixed;
+    pointer-events:none;
+}
+
+.hammer,
+.hammer-hit{
+    display: none;
+    position: absolute;
+    pointer-events:none;
+}
+
+.hammer{
+    width: 110px;
+    height: 85px;
+    right: 55px;
+    bottom: 42px;
+}
+
+.hammer-hit{
+
+}
+
+.no-hit .hammer,
+.hit .hammer-hit{
+    display: block;
+    position: relative;
 }
 
 .title-text {
