@@ -4,8 +4,6 @@ import os
 import subprocess
 import time
 from typing import Tuple
-from pathlib import Path
-
 from kubernetes import client
 
 from molegame.flask_service import start_front_end

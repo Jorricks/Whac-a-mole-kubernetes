@@ -6,7 +6,7 @@ import requests
 from kubernetes.client import CoreV1Api, AppsV1Api
 from requests import Timeout
 
-from molegame.pod_control import get_relevant_pods_status, update_no_replicas_in_deployment, \
+from molegame.pod_control import update_no_replicas_in_deployment, \
     get_containers_in_pod
 import atexit
 import logging
@@ -58,20 +58,11 @@ def get_flask_app(whac_config: WhacConfig, core_v1: CoreV1Api, apps_v1: AppsV1Ap
     def send_img(path):
         return send_from_directory('../resources/img', path)
 
-    @app.route('/get_pod')
+    @app.route('/get_pod_info')
     def get_pods():
         return jsonify(
             [container_status.to_dict() for container_status in
              get_containers_in_pod(
-                 core_instance=core_v1,
-                 deployment_name=whac_config.deployment_name_mole)]
-        )
-
-    @app.route('/get_pod_status')
-    def get_pod_status():
-        return jsonify(
-            [container_status.to_dict() for container_status in
-             get_relevant_pods_status(
                  core_instance=core_v1,
                  deployment_name=whac_config.deployment_name_mole)]
         )
@@ -89,7 +80,7 @@ def get_flask_app(whac_config: WhacConfig, core_v1: CoreV1Api, apps_v1: AppsV1Ap
 
         update_no_replicas_in_deployment(
             whac_config=whac_config, apps_v1=apps_v1, new_no_replicas=new_no_replicas)
-        return jsonify({'ok': 'done'})
+        return jsonify({'Done': f'Changed no_replicas to {str(new_no_replicas)}'})
 
     @app.route('/relay')
     def relay_message() -> str:
