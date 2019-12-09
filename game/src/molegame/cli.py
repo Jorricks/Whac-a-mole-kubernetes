@@ -1,8 +1,8 @@
 from typing import Optional
-
 import click
 
-from molegame.main import run_whac_a_mole
+from molegame.main import run_whac_a_mole, get_minikube_ip
+from molegame.whac_config import WhacConfig
 
 
 @click.command()
@@ -12,7 +12,9 @@ from molegame.main import run_whac_a_mole
 @click.option('--image_name_relay', default='molerelayprod', help='The name of the relay image.')
 @click.option('--deployment_name', default=1, help='Number of replicas of the mole container.')
 @click.option('--namespace_prefix', default='whac', help='Prefix for the deployments namespace.')
-@click.option('--port', default='8080', help='The port.')
+@click.option('--minikube_ip', default=None, help='The ip of minikube.')
+@click.option('--containers_port', default='8080', help='The port.')
+@click.option('--host_port', default='80', help='The port.')
 def start_kubernetes(
         config_file: Optional[str],
         replication: int,
@@ -20,14 +22,23 @@ def start_kubernetes(
         image_name_relay: str,
         deployment_name: str,
         namespace_prefix: str,
-        port: int,
+        minikube_ip: Optional[str],
+        containers_port: int,
+        host_port: int,
 ) -> None:
-    run_whac_a_mole(
+    if minikube_ip is None:
+        project_dir_name = 'whac-a-mole-kubernetes'
+        minikube_ip = get_minikube_ip(project_dir=project_dir_name)
+
+    our_whac_config = WhacConfig(
         kubernetes_config=config_file,
-        no_replicas=int(replication),
         deployment_image_mole=str(image_name_mole),
         deployment_image_relay=str(image_name_relay),
         deployment_name=str(deployment_name),
         namespace=str(namespace_prefix),
-        port=int(port)
+        minikube_ip=minikube_ip,
+        containers_port=int(containers_port),
+        host_port=int(host_port)
     )
+
+    run_whac_a_mole(whac_config=our_whac_config, no_replicas=replication)
