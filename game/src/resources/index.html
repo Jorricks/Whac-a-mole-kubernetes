@@ -2,14 +2,74 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Whac-a-mole</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+    <!--Import Google Icon Font and carnival font, materialize.css and jQuery -->
+    <link rel="stylesheet" href="css/material-icons.css">
     <link rel="stylesheet" href="css/carnival-corpse.css">
-    <link rel="stylesheet" href="css/style.css">
+    <link type="text/css" rel="stylesheet" href="css/materialize.min.css" media="screen,projection"/>
     <script type="text/javascript" src="js/jquery.min.js"></script>
-    <script type="text/javascript" src="js/main.js"></script>
+
+    <!-- Import our custom css -->
+    <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
+
+<div class="settings-icon">
+    <i class="small material-icons">settings</i>
+</div>
+
+<div class="settings-screen">
+    <div class="card">  <!-- class="card loader"> -->
+        <div class="preloader-container">
+            <div class="preloader-wrapper big active card-load">
+                <div class="spinner-layer spinner-blue-only">
+                    <div class="circle-clipper left">
+                        <div class="circle"></div>
+                    </div><div class="gap-patch">
+                    <div class="circle"></div>
+                </div><div class="circle-clipper right">
+                    <div class="circle"></div>
+                </div>
+                </div>
+            </div>
+        </div>
+        <div class="card-content card-show">
+            <div class="close-settings" onclick="$('.settings-screen').removeClass('visible')">
+                <i class="small material-icons">close</i>
+            </div>
+            <span class="card-title">Change settings</span>
+            <div class="settings-form">
+                <div class="input-field">
+                    <select class="kill-method">
+                        <option value="" disabled>Choose your option</option>
+                        <option value="kill" selected>Invalidate</option>
+                        <option value="shutdown">Shutdown</option>
+                    </select>
+                    <label>Invalidate or Shutdown moll webservers</label>
+                </div>
+                <script>
+                    $(document).ready(function(){
+                        $('select').formSelect();
+                    });
+                </script>
+
+                <div class="input-field range-replicas">
+                    <label>The number of replicas: <div class="no_replicas">11</div></label>
+                    <input type="range" min="1" max="21" step="1" oninput="$('.no_replicas').text(this.value)" onchange="$('.no_replicas').text(this.value)">
+                </div>
+            </div>
+        </div>
+        <div class="card-action card-show">
+            <a href="#" onclick="updateSettings()">Update</a>
+            <a href="#" onclick="createSettingsPanel()" style="float: right;">Reset</a>
+        </div>
+    </div>
+<!--    <div class="settings-box">-->
+
+<!--    </div>-->
+</div>
 
 <div class="hover-mouse">
     <img class="hammer" src="img/hammer.png" alt="standard">
@@ -24,6 +84,10 @@
 <div class="all-moles">
 
 </div>
+
+<!--JavaScript at end of body for optimized loading-->
+<script type="text/javascript" src="js/materialize.min.js"></script>
+<script type="text/javascript" src="js/main.js"></script>
 
 </body>
 </html>
