@@ -4,6 +4,9 @@ This is whac-a-mole game with Kubernetes running in the background.
 Each mole is a kubernetes pod. 
 The goal is to kill the pods faster than kubernetes can deploy new ones.
 
+# Example
+![](whac-a-mole-kubernetes.gif)
+
 # Explanation of the application
 This repository is split into three applications.
 
