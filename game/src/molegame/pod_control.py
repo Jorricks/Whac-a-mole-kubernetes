@@ -60,9 +60,9 @@ def create_container_object(deployment_image: str, port: int, external_port: boo
             port=port,
             path='/health'
         ),
-        initial_delay_seconds=5,
-        failure_threshold=2,
-        period_seconds=3,
+        initial_delay_seconds=2,
+        failure_threshold=1,
+        period_seconds=1,
     )
 
     readiness_probe = client.V1Probe(
@@ -70,9 +70,9 @@ def create_container_object(deployment_image: str, port: int, external_port: boo
             port=port,
             path='/health'
         ),
-        initial_delay_seconds=5,
+        initial_delay_seconds=2,
         failure_threshold=2,
-        period_seconds=3,
+        period_seconds=1,
     )
 
     port = client.V1ContainerPort(
@@ -145,6 +145,16 @@ def create_deployment(api_instance: AppsV1Api, deployment: V1Deployment, namespa
     print("Deployment created.\n status=\n'%s'" % str(api_response.status))
 
 
+def get_all_deployments(apps_v1: AppsV1Api, deployment_filter: Optional[str]) -> List[V1Deployment]:
+    if deployment_filter is None:
+        return apps_v1.list_deployment_for_all_namespaces().items
+    else:
+        for a_deployment in apps_v1.list_deployment_for_all_namespaces().items:
+            if deployment_filter in a_deployment.metadata.name:
+                return [a_deployment]
+    return []
+
+
 def update_no_replicas_in_deployment(
         whac_config: WhacConfig,
         apps_v1: AppsV1Api,
@@ -156,14 +166,13 @@ def update_no_replicas_in_deployment(
     :param apps_v1: The api instance.
     :param new_no_replicas: the new number of replicas
     """
-    the_mole_deployment: Optional[client.V1Deployment] = None
-    a_deployment: client.V1Deployment
-    for a_deployment in apps_v1.list_deployment_for_all_namespaces():
-        if whac_config.deployment_name_mole in a_deployment.metadata.name:
-            the_mole_deployment = a_deployment
+    list_of_mole_deployment = get_all_deployments(
+        apps_v1=apps_v1, deployment_filter=whac_config.deployment_name_mole)
 
-    if the_mole_deployment is None:
-        return
+    if len(list_of_mole_deployment) == 0:
+        return None
+
+    the_mole_deployment = list_of_mole_deployment[0]
 
     # Update no replicas image
     the_mole_deployment.spec.replicas = new_no_replicas

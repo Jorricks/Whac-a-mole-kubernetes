@@ -3,12 +3,12 @@ import atexit
 import os
 import subprocess
 import time
-from typing import Tuple
+import webbrowser
 from kubernetes import client
 
 from molegame.flask_service import start_front_end
 from molegame.pod_control import load_kubernetes_config, create_deployment_object, \
-    create_deployment, delete_deployment, print_all_containers_in_pod
+    create_deployment, delete_deployment, print_all_containers_in_pod, get_all_deployments
 from molegame.whac_config import WhacConfig
 
 
@@ -55,28 +55,47 @@ def run_whac_a_mole(
     apps_v1 = client.AppsV1Api()
     core_v1 = client.CoreV1Api()
 
-    deploy_pods(
-        whac_config=whac_config,
-        apps_v1=apps_v1,
-        no_replicas=no_replicas,
-    )
+    deploy = True
+    if whac_config.keep_deployment_alive:
+        whac_deployment = get_all_deployments(
+            apps_v1=apps_v1, deployment_filter=whac_config.deployment_name_mole)
+        relay_deployment = get_all_deployments(
+            apps_v1=apps_v1, deployment_filter=whac_config.deployment_name_relay)
+        if len(whac_deployment) > 0 and len(relay_deployment) > 0:
+            deploy = False
+
+    if deploy:
+        deploy_pods(
+            whac_config=whac_config,
+            apps_v1=apps_v1,
+            no_replicas=no_replicas,
+        )
 
     # When we shut down our program, this is always ran!
-    atexit.register(delete_deployment,
-                    api_instance=apps_v1,
-                    deployment_names=whac_config.deployment_names,
-                    namespace=whac_config.namespace)
+    if not whac_config.keep_deployment_alive:
+        atexit.register(delete_deployment,
+                        api_instance=apps_v1,
+                        deployment_names=whac_config.deployment_names,
+                        namespace=whac_config.namespace)
 
     time.sleep(5)
 
     print_all_containers_in_pod(
         core_instance=core_v1, deployment_name=whac_config.deployment_name_mole)
 
+    open_web_browser(whac_config=whac_config)
+
     start_front_end(whac_config=whac_config, core_v1=core_v1, apps_v1=apps_v1)
 
 
-def get_deployment_names(deployment_name: str) -> Tuple[str, str]:
-    return deployment_name + '-mole-prod', deployment_name + '-relay-prod'
+def open_web_browser(whac_config: WhacConfig) -> None:
+    """
+    Open a web browser tap in Google Chrome with our front-end in it.
+    :param whac_config: All the static configurations required to run are in this instance.
+    """
+    if whac_config.open_web_browser:
+        browser = webbrowser.get('chrome')
+        browser.open('http://localhost:' + str(whac_config.host_port), new=2, autoraise=True)
 
 
 def get_project_folder(project_dir: str) -> str:
@@ -126,7 +145,9 @@ if __name__ == '__main__':
         namespace='whac',
         minikube_ip=get_minikube_ip(project_dir_name),
         containers_port=8080,
-        host_port=80
+        host_port=80,
+        keep_deployment_alive=True,
+        open_web_browser=True
     )
 
     run_whac_a_mole(whac_config=our_whac_config, no_replicas=3)

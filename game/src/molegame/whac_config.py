@@ -12,6 +12,8 @@ class WhacConfig:
     minikube_ip: str
     containers_port: int
     host_port: int
+    keep_deployment_alive: bool
+    open_web_browser: bool
 
     @property
     def deployment_name_mole(self) -> str:

@@ -25,6 +25,7 @@ def start_front_end(whac_config: WhacConfig, core_v1: CoreV1Api, apps_v1: AppsV1
     server = WSGIServer(('0.0.0.0', int(whac_config.host_port)), get_flask_app(
         whac_config=whac_config, core_v1=core_v1, apps_v1=apps_v1
     ))
+
     logging.info(f'Starting webserver at port {whac_config.host_port}')
     server.serve_forever()
 
@@ -53,6 +54,10 @@ def get_flask_app(whac_config: WhacConfig, core_v1: CoreV1Api, apps_v1: AppsV1Ap
     @app.route('/css/<path:path>')
     def send_css(path):
         return send_from_directory('../resources/css', path)
+
+    @app.route('/fonts/<path:path>')
+    def send_fonts(path):
+        return send_from_directory('../resources/fonts', path)
 
     @app.route('/img/<path:path>')
     def send_img(path):
