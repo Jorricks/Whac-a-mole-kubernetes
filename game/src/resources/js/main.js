@@ -53,17 +53,10 @@ function createTextRequest(url, doneFunction) {
 function updateMoles() {
     $.getJSON('http://localhost/get_pod_info')
         .done(function (data) {
+            let shouldRebuildMoles = false;
             if (data.length !== (Object.keys(dictOfHashToIPs).length)) {
                 dictOfHashToIPs = {};
-                for (let container_index in data) {
-                    let container = data[container_index];
-                    let name = container['metadata']['name'];
-                    let hash = name.slice(name.length - 5, name.length);
-                    let ip = container['status']['pod_ip'];
-
-                    dictOfHashToIPs[hash] = ip;
-                }
-                createSetup();
+                shouldRebuildMoles = true;
             }
 
             dictOfHashToStatus = {};
@@ -71,15 +64,21 @@ function updateMoles() {
                 let container = data[container_index];
                 let name = container['metadata']['name'];
                 let hash = name.slice(name.length - 5, name.length);
+                let ip = container['status']['pod_ip'];
                 let ready = container['status']['container_statuses'][0]['ready'];
                 let terminated = container['metadata']['deletion_timestamp'];
 
+                dictOfHashToIPs[hash] = ip;
                 dictOfHashToStatus[hash] = (ready) ? 'ready' : 'unready';
                 if (terminated !== null) {
                     console.log('Terminated ', hash);
                     dictOfHashToStatus[hash] = 'terminated';
                 }
             }
+            if (shouldRebuildMoles){
+                createSetup();
+            }
+
             updateMoleReadyOrNot(dictOfHashToStatus);
 
             if (updateSettingsAtBoot){
