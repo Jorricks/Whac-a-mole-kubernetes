@@ -1,17 +1,21 @@
 # Mole game
-The core of the application. \
-This part is responsible for the logic of creating and updating the kubernetes pods 
-and the interface.
+This application contains most of the logic.\
+Based on the configuration given by the command line arguments, it starts the two pods(mole pod
+ and mole relay). \
+Once the pods are deployed, the front end flask app is launched. \
+Here we can access our whac a mole interface. \
+When we press a mole, a kill or shutdown command is send through the server, to the relay, 
+to finally end up at the specific container in the mole pod. \
+Once the mole pod is down, kubernetes will take care to relaunch it.
 
-# Minikube settings
-    export MINIKUBE_HOME=/Users/jorricks/PycharmProjects/whac-a-mole-kubernetes;
-    export PATH=$MINIKUBE_HOME/bin:$PATH
-    export KUBECONFIG=$MINIKUBE_HOME/.kube/config
-    export KUBE_EDITOR="code -w"
+# Setup
+    pip install .
+For during development use
+    
+    pip install -e ".[dev]"
 
-    minikube --profile whac config set memory 6144
-    minikube --profile whac config set cpus 2
-    minikube --profile whac config set vm-driver hyperkit
-    minikube --profile whac config set kubernetes-version v1.15.6
-    minikube start --profile whac
-    minikube profile whac
+# Running
+You can either run this by pip installing our game as shown above, or by simply running 
+game/src/molegame/main.py. \
+In the case you kept the default ports, the interface of whac-a-mole is accessible at 
+http://localhost:80. \

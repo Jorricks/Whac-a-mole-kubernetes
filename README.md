@@ -34,6 +34,7 @@ Once the mole pod is down, kubernetes will take care to relaunch it.
 1. Python3.7
 2. Docker
 3. Minikube
+4. Google Chrome
 
 # General instructions
 ### Terminal commands to get a working Minikube
@@ -43,7 +44,7 @@ change the upcoming commands but also part of the project. \
 You can store the 'whac-a-mole-kubernetes' directory anywhere you like, as long as you set the
 correct MINIKUBE_HOME location for each terminal session
     
-    export MINIKUBE_HOME=~PycharmProjects/whac-a-mole-kubernetes;
+    export MINIKUBE_HOME=~/PycharmProjects/whac-a-mole-kubernetes;
     export PATH=$MINIKUBE_HOME/bin:$PATH
     export KUBECONFIG=$MINIKUBE_HOME/.kube/config
     export KUBE_EDITOR="code -w"
@@ -69,7 +70,7 @@ we can build the pod and relay. The assumption is made that we start from the pr
     docker build -t molepodprod . 
 
 Once the docker images are build, we can already start out application. \
-This can either be done by pip installing our game, our by simply running 
+This can either be done by pip installing our game, or by simply running 
 game/src/molegame/main.py. \
 In the case you kept the default ports, the interface of whac-a-mole is accessible at 
 http://localhost:80. \

@@ -60,8 +60,8 @@ def create_container_object(deployment_image: str, port: int, external_port: boo
             port=port,
             path='/health'
         ),
-        initial_delay_seconds=2,
-        failure_threshold=1,
+        initial_delay_seconds=3,
+        failure_threshold=2,
         period_seconds=1,
     )
 
